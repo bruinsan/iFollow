@@ -6,32 +6,15 @@
 #include <iostream>
 #include <thread>
 #include <chrono> // sleep
+
+#include "timer.hpp"
 /******************** END IMPORTS **********************/
 using namespace std;
 using namespace std::chrono_literals;
 
-class Timer
-{
-private:
-    int period;
-    int beep_duration;
-
-public:
-    Timer(/* args */);
-    ~Timer();
-};
-
-Timer::Timer(/* args */)
-{
-}
-
-Timer::~Timer()
-{
-}
-
-void beep() { cout << "X"; }
 void noBeep() { cout << "_"; }
 
+/*
 void highPriority()
 {
     // int i=0;
@@ -40,9 +23,9 @@ void highPriority()
         for (int i = 0; i < 5; i++)
         {
             beep();
-            std::this_thread::sleep_for(500ms);
+            this_thread::sleep_for(500ms);
         }
-        std::this_thread::sleep_for(2s);
+        this_thread::sleep_for(2s);
     }
 }
 
@@ -51,7 +34,7 @@ void mediumPriority()
     while (1)
     {
         beep();
-        std::this_thread::sleep_for(1s);
+        this_thread::sleep_for(1s);
     }
 }
 
@@ -59,25 +42,26 @@ void lowPriority()
 {
     while (1)
     {
-        auto start_time = std::chrono::high_resolution_clock::now();
-        auto after_time = std::chrono::high_resolution_clock::now();
+        auto start_time = chrono::high_resolution_clock::now();
+        auto after_time = chrono::high_resolution_clock::now();
 
         auto elapsed = after_time - start_time;
 
         cout << "here" << endl;
-        while (elapsed < std::chrono::seconds(1))
+        while (elapsed < chrono::seconds(1))
         {
             beep();
-            std::this_thread::sleep_for(250ms);
-            after_time = std::chrono::high_resolution_clock::now();
+            this_thread::sleep_for(250ms);
+            after_time = chrono::high_resolution_clock::now();
             // std::chrono::duration<double, std::milli> elapsed = after_time - start_time;
             elapsed = after_time - start_time;
 
             // cout << after_time - start_time << endl;
         }
-        std::this_thread::sleep_for(30s);
+        this_thread::sleep_for(30s);
     }
 }
+*/
 
 /*
 * function from : https://stackoverflow.com/questions/421860/
@@ -111,39 +95,66 @@ int main(int argc, char **argv)
     setbuf(stdout, NULL); // No buffering.
     // setbuf(stdin, NULL);  // Optional: No buffering.
 
-    std::thread t1, t2, t3;
-    while (1)
+    //TODO: implement heap or linked list to the priority queue
+    Timer tHigh(500ms, 250ms, 5, 2s, High);
+    Timer tMedium(1s, 250ms, 1, 0s, Medium);
+    Timer tLow(30s, 1s, 1, 0s, Low);
+
+    while (true)
     {
         if (kbhit())
         {
             switch (c = getchar())
             {
             case 'h':
-                cout << endl
-                     << "High Priority TIMER" << endl;
-                t1 = std::thread(&highPriority);
+                if (!tHigh.isActivated())
+                {
+                    cout << endl
+                         << "High Priority TIMER" << endl;
+                    // must stop all others timers
+                    tMedium.deactivate(); tLow.deactivate();
+                    tHigh.activate();
+                }
+                else
+                    tHigh.deactivate();
                 break;
+
             case 'm':
-                cout << endl
-                     << "Medium Priority TIMER" << endl;
-                t1 = std::thread(&mediumPriority);
+                if (!tMedium.isActivated() && !tHigh.isActivated())
+                {
+                    cout << endl
+                         << "Medium Priority TIMER" << endl;
+                    // must stop low timer
+                    tLow.deactivate();
+                    tMedium.activate();
+                }
+                else
+                    tMedium.deactivate();
                 break;
+
             case 'l':
-                cout << endl
-                     << "Low Priority TIMER" << endl;
-                t1 = std::thread(&lowPriority);
+                if (!tLow.isActivated() && !tMedium.isActivated() && !tHigh.isActivated())
+                {
+                    cout << endl
+                         << "Low Priority TIMER" << endl;
+                    tLow.activate();
+                }
+                else
+                    tLow.deactivate();
                 break;
+
             case 'q':
                 cout << endl
                      << "Stopping all Timers" << endl;
-                // stop each timer and join threads
+                tHigh.deactivate(); tMedium.deactivate(); tLow.deactivate();
                 break;
             default:
                 break;
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
-        noBeep();
+        // cout << chrono::system_clock::to_time_t(chrono::system_clock::now()) << endl;
+        beepOrNoBeep(false);
+        this_thread::sleep_for(250ms);
     }
 
     return 0;
