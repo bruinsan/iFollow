@@ -153,7 +153,7 @@ int main(int argc, char **argv)
             }
         }
         // cout << chrono::system_clock::to_time_t(chrono::system_clock::now()) << endl;
-        beepOrNoBeep(false);
+        beepOrNoBeep(false, 0s);
         this_thread::sleep_for(250ms);
     }
 

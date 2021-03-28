@@ -57,14 +57,26 @@ public:
 };
 
 std::mutex mu;
-void beepOrNoBeep(bool beep)
+void beepOrNoBeep(bool beep, TimePeriod duration)
 {
-    // mu.lock();
+    mu.lock();
+    auto now = chrono::system_clock::now();
+    auto max = now + duration;
     if (beep)
-        cout << "X";
+    {
+        // auto elapsed_time = now + 0s;
+        // int i=0;
+        // cout << chrono::system_clock::to_time_t(max) << endl;
+        while (now < max)
+        {
+            cout << "X";
+            this_thread::sleep_for(250ms);
+            now += 250ms;
+        }
+    }
     else
         cout << "_";
-    // mu.unlock();
+    mu.unlock();
 }
 
 void Timer::activate()
@@ -91,13 +103,16 @@ void Timer::startTimer()
     {
         for (int i = 0; i < this->beep_repeat; i++)
         {
-            beepOrNoBeep(true);
             // when the beep period is large, joining a thread will block until the end
             // of the period, we should use maybe condition_variable::wait_for()
             this_thread::sleep_for(this->beep_period);
+            beepOrNoBeep(true, this->beep_duration);
         }
-        // beepOrNoBeep(true); // last beep before pause (for HIGH timer)
-        this_thread::sleep_for(this->pause);
+        // in the case pause != zero, we need to subtract the last beep_period from the pause
+        // otherwise the interval will contain the pause + beep_period
+        // (e.g. 2s + 500ms for the HIGH timer)
+        if (this->pause != 0s)
+            this_thread::sleep_for(this->pause - this->beep_period);
     }
 }
 
