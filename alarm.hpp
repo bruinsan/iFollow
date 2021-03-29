@@ -82,9 +82,7 @@ void Alarm::activate()
 
 typedef std::unique_lock<std::mutex> lock_type;
 std::mutex mtx_ready;
-std::mutex mtx_work;
 std::condition_variable cv;
-bool ready = false;
 
 void Alarm::deactivate()
 {
