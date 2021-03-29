@@ -12,56 +12,7 @@
 using namespace std;
 using namespace std::chrono_literals;
 
-void noBeep() { cout << "_"; }
-
-/*
-void highPriority()
-{
-    // int i=0;
-    while (1)
-    {
-        for (int i = 0; i < 5; i++)
-        {
-            beep();
-            this_thread::sleep_for(500ms);
-        }
-        this_thread::sleep_for(2s);
-    }
-}
-
-void mediumPriority()
-{
-    while (1)
-    {
-        beep();
-        this_thread::sleep_for(1s);
-    }
-}
-
-void lowPriority()
-{
-    while (1)
-    {
-        auto start_time = chrono::high_resolution_clock::now();
-        auto after_time = chrono::high_resolution_clock::now();
-
-        auto elapsed = after_time - start_time;
-
-        cout << "here" << endl;
-        while (elapsed < chrono::seconds(1))
-        {
-            beep();
-            this_thread::sleep_for(250ms);
-            after_time = chrono::high_resolution_clock::now();
-            // std::chrono::duration<double, std::milli> elapsed = after_time - start_time;
-            elapsed = after_time - start_time;
-
-            // cout << after_time - start_time << endl;
-        }
-        this_thread::sleep_for(30s);
-    }
-}
-*/
+std::mutex mu; // mutex used on the shared function BeepOrNoBeep()
 
 /*
 * function from : https://stackoverflow.com/questions/421860/
@@ -89,17 +40,33 @@ int kbhit(void)
     return nbbytes;
 }
 
+void beepOrNoBeep(bool beep, TimePeriod duration)
+{
+    { // scope to lock the mutex with unique_lock
+        auto lock = std::unique_lock<std::mutex>(mu);
+        auto start = chrono::system_clock::now();
+        if (beep)
+        {
+            while (chrono::system_clock::now() - start < duration)
+            {
+                cout << "X";
+                this_thread::sleep_for(250ms);
+            }
+        }
+        else
+            cout << "_";
+    }
+}
+
 int main(int argc, char **argv)
 {
     char c;
     setbuf(stdout, NULL); // No buffering.
-    // setbuf(stdin, NULL);  // Optional: No buffering.
 
     //TODO: implement heap or linked list to the priority queue
     Timer tHigh(500ms, 250ms, 5, 2s, High);
     Timer tMedium(1s, 250ms, 1, 0s, Medium);
     Timer tLow(30s, 1s, 1, 0s, Low);
-
     while (true)
     {
         if (kbhit())
@@ -110,9 +77,17 @@ int main(int argc, char **argv)
                 if (!tHigh.isActivated())
                 {
                     cout << endl
-                         << "High Priority TIMER" << endl;
+                         << "\tHIGH\t";
                     // must stop all others timers
-                    tMedium.deactivate(); tLow.deactivate();
+                    tMedium.deactivate();
+                    tLow.deactivate();
+
+                    // /******* test mutex loka ********/
+                    // lock_type lck2(mtx_ready);
+                    // // ready = true; // This happens around 3s into the program
+                    // lck2.unlock();
+                    // cv.notify_all();
+
                     tHigh.activate();
                 }
                 else
@@ -123,9 +98,9 @@ int main(int argc, char **argv)
                 if (!tMedium.isActivated() && !tHigh.isActivated())
                 {
                     cout << endl
-                         << "Medium Priority TIMER" << endl;
-                    // must stop low timer
-                    tLow.deactivate();
+                         << "\tMEDIUM\t";
+
+                    tLow.deactivate(); // must stop low timer
                     tMedium.activate();
                 }
                 else
@@ -136,7 +111,7 @@ int main(int argc, char **argv)
                 if (!tLow.isActivated() && !tMedium.isActivated() && !tHigh.isActivated())
                 {
                     cout << endl
-                         << "Low Priority TIMER" << endl;
+                         << "\tLOW\t";
                     tLow.activate();
                 }
                 else
@@ -146,13 +121,15 @@ int main(int argc, char **argv)
             case 'q':
                 cout << endl
                      << "Stopping all Timers" << endl;
-                tHigh.deactivate(); tMedium.deactivate(); tLow.deactivate();
+                tHigh.deactivate();
+                tMedium.deactivate();
+                tLow.deactivate();
                 break;
+            
             default:
                 break;
             }
         }
-        // cout << chrono::system_clock::to_time_t(chrono::system_clock::now()) << endl;
         beepOrNoBeep(false, 0s);
         this_thread::sleep_for(250ms);
     }

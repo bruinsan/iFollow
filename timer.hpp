@@ -5,8 +5,13 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <condition_variable>
 
 using namespace std;
+
+typedef const chrono::duration<double, std::milli> TimePeriod;
+
+void beepOrNoBeep(bool beep, TimePeriod duration);
 
 enum Priority
 {
@@ -14,16 +19,6 @@ enum Priority
     Medium,
     Low
 };
-
-class TimerManager
-{
-private:
-public:
-    TimerManager(){};
-    ~TimerManager();
-};
-
-typedef const chrono::duration<double, std::milli> TimePeriod;
 
 class Timer
 {
@@ -56,43 +51,27 @@ public:
     ~Timer(){};
 };
 
-std::mutex mu;
-void beepOrNoBeep(bool beep, TimePeriod duration)
-{
-    mu.lock();
-    auto now = chrono::system_clock::now();
-    auto max = now + duration;
-    if (beep)
-    {
-        // auto elapsed_time = now + 0s;
-        // int i=0;
-        // cout << chrono::system_clock::to_time_t(max) << endl;
-        while (now < max)
-        {
-            cout << "X";
-            this_thread::sleep_for(250ms);
-            now += 250ms;
-        }
-    }
-    else
-        cout << "_";
-    mu.unlock();
-}
-
 void Timer::activate()
 {
     this->is_activated = true;
     this->thr = thread(&Timer::startTimer, this);
 }
 
+typedef std::unique_lock<std::mutex> lock_type;
+std::mutex mtx_ready;
+std::mutex mtx_work;
+std::condition_variable cv;
+bool ready = false;
+
 void Timer::deactivate()
 {
     this->is_activated = false;
-    // we must test here because in case the timer is already deactivated, we don't have
-    // any thread to join
+
+    // we must test fi joinable here because in case the timer is already deactivated,
+    // we don't have any thread to join and an exception will be raised
     if (this->thr.joinable())
     {
-        cout << "joining thread" << endl;
+        cv.notify_all();
         this->thr.join();
     }
 }
@@ -103,10 +82,14 @@ void Timer::startTimer()
     {
         for (int i = 0; i < this->beep_repeat; i++)
         {
+            lock_type lck(mtx_ready);
             // when the beep period is large, joining a thread will block until the end
             // of the period, we should use maybe condition_variable::wait_for()
-            this_thread::sleep_for(this->beep_period);
-            beepOrNoBeep(true, this->beep_duration);
+            cv.wait_for(lck, this->beep_period);
+            if (isActivated())
+                beepOrNoBeep(true, this->beep_duration);
+            else
+                return;
         }
         // in the case pause != zero, we need to subtract the last beep_period from the pause
         // otherwise the interval will contain the pause + beep_period
