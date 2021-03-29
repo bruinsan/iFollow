@@ -4,7 +4,6 @@
 // end kbhit
 
 #include <iostream>
-#include <thread>
 #include <chrono> // sleep
 
 #include "alarm.hpp"
@@ -12,7 +11,6 @@
 using namespace std;
 using namespace std::chrono_literals;
 
-std::mutex mu; // mutex used on the shared function BeepOrNoBeep()
 
 /*
 * function from : https://stackoverflow.com/questions/421860/
@@ -40,24 +38,6 @@ int kbhit(void)
     return nbbytes;
 }
 
-void beepOrNoBeep(bool beep, TimePeriod duration)
-{
-    { // scope to lock the mutex with unique_lock
-        auto lock = std::unique_lock<std::mutex>(mu);
-        auto start = chrono::system_clock::now();
-        if (beep)
-        {
-            while (chrono::system_clock::now() - start < duration)
-            {
-                cout << "X";
-                this_thread::sleep_for(250ms);
-            }
-        }
-        else
-            cout << "_";
-    }
-}
-
 int main(int argc, char **argv)
 {
     char c;
@@ -67,7 +47,7 @@ int main(int argc, char **argv)
     Alarm tHigh(500ms, 250ms, 5, 2s, High);
     Alarm tMedium(1s, 250ms, 1, 0s, Medium);
     Alarm tLow(30s, 1s, 1, 0s, Low);
-    while (true)
+    while (c != 'Q')
     {
         if (kbhit())
         {
@@ -77,7 +57,7 @@ int main(int argc, char **argv)
                 if (!tHigh.isActivated())
                 {
                     cout << endl
-                         << "\tHIGH\t";
+                         << "\t\tHIGH\t";
                     // must stop all others timers
                     tMedium.deactivate();
                     tLow.deactivate();
@@ -91,7 +71,7 @@ int main(int argc, char **argv)
                 if (!tMedium.isActivated() && !tHigh.isActivated())
                 {
                     cout << endl
-                         << "\tMEDIUM\t";
+                         << "\t\tMEDIUM\t";
 
                     tLow.deactivate(); // must stop low timer
                     tMedium.activate();
@@ -104,16 +84,16 @@ int main(int argc, char **argv)
                 if (!tLow.isActivated() && !tMedium.isActivated() && !tHigh.isActivated())
                 {
                     cout << endl
-                         << "\tLOW\t";
+                         << "\t\tLOW\t";
                     tLow.activate();
                 }
                 else
                     tLow.deactivate();
                 break;
 
-            case 'q':
+            case 's':
                 cout << endl
-                     << "Stopping all Timers" << endl;
+                     << "Stopping all Timers\t";
                 tHigh.deactivate();
                 tMedium.deactivate();
                 tLow.deactivate();

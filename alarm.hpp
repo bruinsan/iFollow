@@ -11,7 +11,24 @@ using namespace std;
 
 typedef const chrono::duration<double, std::milli> TimePeriod;
 
-void beepOrNoBeep(bool beep, TimePeriod duration);
+std::mutex mu; // mutex used on the shared function BeepOrNoBeep()
+void beepOrNoBeep(bool beep, TimePeriod duration)
+{
+    { // scope to lock the mutex with unique_lock
+        auto lock = std::unique_lock<std::mutex>(mu);
+        auto start = chrono::system_clock::now();
+        if (beep)
+        {
+            while (chrono::system_clock::now() - start < duration)
+            {
+                cout << "X";
+                this_thread::sleep_for(250ms);
+            }
+        }
+        else
+            cout << "_";
+    }
+}
 
 enum Priority
 {
@@ -19,6 +36,7 @@ enum Priority
     Medium,
     Low
 };
+const char *priority_names[] = {"HIGH", "MEDIUM", "LOW"};
 
 class Alarm
 {
@@ -48,7 +66,11 @@ public:
 
     void startTimer();
     void stopTimer();
-    ~Alarm(){};
+    ~Alarm()
+    {
+        cout << endl
+             << "Destrying the alarm {" << priority_names[this->p] << "}" << endl;
+    };
 };
 
 void Alarm::activate()
