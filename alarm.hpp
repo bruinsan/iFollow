@@ -70,6 +70,7 @@ public:
     {
         cout << endl
              << "Destrying the alarm {" << priority_names[this->p] << "}" << endl;
+        this->deactivate();
     };
 };
 
