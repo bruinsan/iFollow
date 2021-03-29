@@ -20,7 +20,7 @@ enum Priority
     Low
 };
 
-class Timer
+class Alarm
 {
 private:
     TimePeriod beep_period;
@@ -36,7 +36,7 @@ private:
     thread thr; // TODO : use unique_ptr<thread>
 
 public:
-    Timer(TimePeriod bp, TimePeriod bd, int br, TimePeriod _pause, Priority _p)
+    Alarm(TimePeriod bp, TimePeriod bd, int br, TimePeriod _pause, Priority _p)
         : beep_period(bp), beep_duration(bd), beep_repeat(br), pause(_pause), p(_p)
     {
         is_activated = false;
@@ -48,13 +48,13 @@ public:
 
     void startTimer();
     void stopTimer();
-    ~Timer(){};
+    ~Alarm(){};
 };
 
-void Timer::activate()
+void Alarm::activate()
 {
     this->is_activated = true;
-    this->thr = thread(&Timer::startTimer, this);
+    this->thr = thread(&Alarm::startTimer, this);
 }
 
 typedef std::unique_lock<std::mutex> lock_type;
@@ -63,7 +63,7 @@ std::mutex mtx_work;
 std::condition_variable cv;
 bool ready = false;
 
-void Timer::deactivate()
+void Alarm::deactivate()
 {
     this->is_activated = false;
 
@@ -76,7 +76,7 @@ void Timer::deactivate()
     }
 }
 
-void Timer::startTimer()
+void Alarm::startTimer()
 {
     while (isActivated())
     {

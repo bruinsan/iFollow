@@ -7,7 +7,7 @@
 #include <thread>
 #include <chrono> // sleep
 
-#include "timer.hpp"
+#include "alarm.hpp"
 /******************** END IMPORTS **********************/
 using namespace std;
 using namespace std::chrono_literals;
@@ -64,9 +64,9 @@ int main(int argc, char **argv)
     setbuf(stdout, NULL); // No buffering.
 
     //TODO: implement heap or linked list to the priority queue
-    Timer tHigh(500ms, 250ms, 5, 2s, High);
-    Timer tMedium(1s, 250ms, 1, 0s, Medium);
-    Timer tLow(30s, 1s, 1, 0s, Low);
+    Alarm tHigh(500ms, 250ms, 5, 2s, High);
+    Alarm tMedium(1s, 250ms, 1, 0s, Medium);
+    Alarm tLow(30s, 1s, 1, 0s, Low);
     while (true)
     {
         if (kbhit())
@@ -81,13 +81,6 @@ int main(int argc, char **argv)
                     // must stop all others timers
                     tMedium.deactivate();
                     tLow.deactivate();
-
-                    // /******* test mutex loka ********/
-                    // lock_type lck2(mtx_ready);
-                    // // ready = true; // This happens around 3s into the program
-                    // lck2.unlock();
-                    // cv.notify_all();
-
                     tHigh.activate();
                 }
                 else
