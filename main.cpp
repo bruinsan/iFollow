@@ -4,19 +4,10 @@
 // end kbhit
 
 #include <iostream>
-#include <chrono> // sleep
 
 #include "alarm.hpp"
-/******************** END IMPORTS **********************/
-using namespace std;
-using namespace std::chrono_literals;
 
-
-/*
-* function from : https://stackoverflow.com/questions/421860/
-* capture-characters-from-standard-input-without-waiting-for-enter-to-be-pressed/33201364#33201364
-* inspired on conio.h library for windows
-*/
+// function from : https://bit.ly/3maDF2A inspired on conio.h library for windows
 int kbhit(void)
 {
     static bool initflag = false;
@@ -98,7 +89,7 @@ int main(int argc, char **argv)
                 tMedium.deactivate();
                 tLow.deactivate();
                 break;
-            
+
             default:
                 break;
             }
