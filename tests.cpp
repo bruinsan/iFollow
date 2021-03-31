@@ -14,12 +14,17 @@ TEST(BeepTest, CountBeep)
 {
     auto sleep_time = 10s;
     Alarm a1(250ms, 0ms, 1, 0s, Medium);
-    a1.activate();
+    a1.activate(); a1.startTimer();
     auto start_point = chrono::system_clock::now();
     std::this_thread::sleep_for(sleep_time);
     
     ASSERT_EQ(a1.getBeepCounter(), sleep_time/250ms-1);
 }
+
+// TEST(BeepTest, PriorityCheck)
+// {
+
+// }
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

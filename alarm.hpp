@@ -16,9 +16,9 @@ typedef const chrono::duration<double, std::milli> TimePeriod;
 
 enum Priority
 {
-    High,
+    Low,
     Medium,
-    Low
+    High
 };
 
 void beepOrNoBeep(bool beep, TimePeriod duration);
@@ -33,24 +33,29 @@ private:
 
     // ATOMIC variable to have a well-defined behavior
     // between write and read by different threads
-    atomic<bool> is_activated;
+    atomic<bool> is_activated, is_started;
     atomic<int> beep_count;
 
-    Priority p;
     thread thr;
+    Priority p;
 
 public:
     Alarm(TimePeriod bp, TimePeriod bd, int br, TimePeriod _pause, Priority _p);
 
     void activate();
     void deactivate();
-
-    bool isActivated() { return is_activated; }
-    std::thread::id getThreadId();
-    int getBeepCounter();
-
     void startTimer();
     void stopTimer();
+
+    void beepTask();
+
+    bool isActivated() const { return is_activated; }
+    bool isStarted() const { return is_started; }
+    
+    Priority getPriority() const { return this->p;}
+    std::thread::id getThreadId() const;  // used in unittests
+    int getBeepCounter() const;           // used in unittests
+
     ~Alarm();
 };
 

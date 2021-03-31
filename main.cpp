@@ -34,7 +34,6 @@ int main(int argc, char **argv)
     char c;
     setbuf(stdout, NULL); // No buffering.
 
-    //TODO: implement heap or linked list to the priority queue
     Alarm tHigh(500ms, 250ms, 5, 2s, High);
     Alarm tMedium(1s, 250ms, 1, 0s, Medium);
     Alarm tLow(30s, 1s, 1, 0s, Low);
@@ -45,41 +44,74 @@ int main(int argc, char **argv)
             switch (c = getchar())
             {
             case 'h':
-                if (!tHigh.isActivated())
+                if (!tHigh.isStarted())
                 {
                     cout << endl
                          << "\t\tHIGH\t";
                     // must stop all others timers
-                    tMedium.deactivate();
-                    tLow.deactivate();
-                    tHigh.activate();
+                    tMedium.stopTimer(); // maybe stop just
+                    tLow.stopTimer();
+                    if (tHigh.isActivated())
+                    {
+                        tHigh.startTimer();
+                    }
+                    else
+                    {
+                        tHigh.activate();
+                        tHigh.startTimer();
+                    }
                 }
                 else
-                    tHigh.deactivate();
+                {
+                    tHigh.stopTimer();
+                    if (tMedium.isActivated())
+                        tMedium.startTimer();
+                    if (!tMedium.isActivated() && tLow.isActivated())
+                        tLow.startTimer();
+                }
+                // alarm_manager.triggerAlarm(High)
                 break;
 
             case 'm':
-                if (!tMedium.isActivated() && !tHigh.isActivated())
+                if (!tMedium.isStarted() && !tHigh.isStarted())
                 {
                     cout << endl
                          << "\t\tMEDIUM\t";
 
-                    tLow.deactivate(); // must stop low timer
-                    tMedium.activate();
+                    tLow.stopTimer(); // must stop low timer
+                    if (tMedium.isActivated())
+                    {
+                        tMedium.startTimer();
+                    }
+                    else
+                    {
+                        tMedium.activate();
+                        tMedium.startTimer();
+                    }
                 }
                 else
-                    tMedium.deactivate();
+                {
+                    tMedium.stopTimer();
+                    if (tLow.isActivated())
+                        tLow.startTimer();
+                }
                 break;
 
             case 'l':
-                if (!tLow.isActivated() && !tMedium.isActivated() && !tHigh.isActivated())
+                if (!tLow.isStarted() && !tMedium.isStarted() && !tHigh.isStarted())
                 {
                     cout << endl
                          << "\t\tLOW\t";
-                    tLow.activate();
+                    if (tLow.isActivated())
+                        tLow.startTimer();
+                    else
+                    {
+                        tLow.activate();
+                        tLow.startTimer();
+                    }
                 }
                 else
-                    tLow.deactivate();
+                    tLow.stopTimer();
                 break;
 
             case 's':
