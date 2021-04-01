@@ -18,8 +18,7 @@ void AlarmManager::triggerAlarm(Alarm *a)
     }
     if (!a->isStarted() and !higher_priority_started)
     {
-        cout << endl
-             << "\t" << priority_names2[a->getPriority()] << "\t";
+        cout << "\t" << priority_names2[a->getPriority()] << "\t";
         for (auto &al : alarms)
         {
             if (al->getPriority() < a->getPriority())
@@ -46,6 +45,8 @@ void AlarmManager::triggerAlarm(Alarm *a)
         {
             if (al->getPriority() < a->getPriority() && al->isActivated())
             {
+                cout << "\t" << priority_names2[al->getPriority()] << "\t";
+
                 al->startTimer();
                 break; // we only want the next activated timer to be started
             }
@@ -55,7 +56,7 @@ void AlarmManager::triggerAlarm(Alarm *a)
 
 void AlarmManager::deactivateAll()
 {
+    // only called when `s` are typed, stopping and deactivating all timers
     for (auto &i : alarms)
         i->deactivate();
-    // only called when `s` are typed, stopping and deactivating all timers
 }
