@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "alarm.hpp"
+#include "alarmManager.hpp"
 
 // function from : https://bit.ly/3maDF2A inspired on conio.h library for windows
 int kbhit(void)
@@ -37,6 +38,13 @@ int main(int argc, char **argv)
     Alarm tHigh(500ms, 250ms, 5, 2s, High);
     Alarm tMedium(1s, 250ms, 1, 0s, Medium);
     Alarm tLow(30s, 1s, 1, 0s, Low);
+
+    AlarmManager alarm_manager;
+
+    alarm_manager.addAlarm(&tHigh);
+    alarm_manager.addAlarm(&tMedium);
+    alarm_manager.addAlarm(&tLow);
+
     while (c != 'Q')
     {
         if (kbhit())
@@ -44,82 +52,23 @@ int main(int argc, char **argv)
             switch (c = getchar())
             {
             case 'h':
-                if (!tHigh.isStarted())
-                {
-                    cout << endl
-                         << "\t\tHIGH\t";
-                    // must stop all others timers
-                    tMedium.stopTimer(); // maybe stop just
-                    tLow.stopTimer();
-                    if (tHigh.isActivated())
-                    {
-                        tHigh.startTimer();
-                    }
-                    else
-                    {
-                        tHigh.activate();
-                        tHigh.startTimer();
-                    }
-                }
-                else
-                {
-                    tHigh.stopTimer();
-                    if (tMedium.isActivated())
-                        tMedium.startTimer();
-                    if (!tMedium.isActivated() && tLow.isActivated())
-                        tLow.startTimer();
-                }
-                // alarm_manager.triggerAlarm(High)
+                alarm_manager.triggerAlarm(&tHigh);
                 break;
 
             case 'm':
-                if (!tMedium.isStarted() && !tHigh.isStarted())
-                {
-                    cout << endl
-                         << "\t\tMEDIUM\t";
+                alarm_manager.triggerAlarm(&tMedium);
 
-                    tLow.stopTimer(); // must stop low timer
-                    if (tMedium.isActivated())
-                    {
-                        tMedium.startTimer();
-                    }
-                    else
-                    {
-                        tMedium.activate();
-                        tMedium.startTimer();
-                    }
-                }
-                else
-                {
-                    tMedium.stopTimer();
-                    if (tLow.isActivated())
-                        tLow.startTimer();
-                }
                 break;
 
             case 'l':
-                if (!tLow.isStarted() && !tMedium.isStarted() && !tHigh.isStarted())
-                {
-                    cout << endl
-                         << "\t\tLOW\t";
-                    if (tLow.isActivated())
-                        tLow.startTimer();
-                    else
-                    {
-                        tLow.activate();
-                        tLow.startTimer();
-                    }
-                }
-                else
-                    tLow.stopTimer();
+                alarm_manager.triggerAlarm(&tLow);
+
                 break;
 
             case 's':
                 cout << endl
                      << "Stopping all Timers\t";
-                tHigh.deactivate();
-                tMedium.deactivate();
-                tLow.deactivate();
+                alarm_manager.deactivateAll();
                 break;
 
             default:
