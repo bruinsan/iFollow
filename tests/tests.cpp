@@ -1,5 +1,5 @@
-#include "alarm.hpp"
-#include "alarmManager.hpp"
+#include "alarm/alarm.hpp"
+#include "alarm/alarmManager.hpp"
 #include <gtest/gtest.h>
 
 TEST(AlarmManagerTest, DifferentThreads)

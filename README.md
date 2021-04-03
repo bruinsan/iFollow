@@ -86,17 +86,17 @@ Tested on Ubuntu 20.04
  
 ### Usage
  
-After building the project, we have 2 binary files (main application and the unitests). 
+After building the project, we have 2 binary files (for the main application and the tests). 
 
 To run the application, we do:
 ```sh
-./build/alarm
+./build/alarm_sample
 ```
  
-To run the unit tests:
+To run the tests:
  
 ```sh
-./build/unittests
+./build/tests/test_alarm
 ```
  
 ## Typical scenario

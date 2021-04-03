@@ -6,16 +6,12 @@ PROJECT(
 	LANGUAGES C CXX
 	)
 
-FIND_PACKAGE ( Threads REQUIRED )
-ADD_EXECUTABLE ( alarm main.cpp alarm.cpp alarmManager.cpp)
-TARGET_LINK_LIBRARIES ( alarm ${CMAKE_THREAD_LIBS_INIT} )
+include_directories(.)
 
-# Locate GTest
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+add_subdirectory(alarm)
+add_subdirectory(tests)
 
-# Link runTests with what we want to test and the GTest and pthread library
-add_executable(unittest tests.cpp alarm.cpp alarmManager.cpp)
-target_link_libraries(unittest ${GTEST_LIBRARIES} pthread)
+add_executable(alarm_sample main.cpp)
+target_link_libraries(alarm_sample alarm)
 
 

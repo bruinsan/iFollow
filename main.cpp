@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include "alarm.hpp"
-#include "alarmManager.hpp"
+#include "alarm/alarm.hpp"
+#include "alarm/alarmManager.hpp"
 
 // function from : https://bit.ly/3maDF2A inspired on conio.h library for windows
 int kbhit(void)
