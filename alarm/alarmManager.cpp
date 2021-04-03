@@ -23,31 +23,31 @@ void AlarmManager::triggerAlarm(Alarm *a)
         {
             if (al->getPriority() < a->getPriority())
             {
-                al->stopTimer();
+                al->stopAlarm();
             }
         }
 
         if (a->isActivated())
             // case where the alarm had already been activated and is only stopped
-            a->startTimer();
+            a->startAlarm();
         else
         {
             // first time we are starting the alarm
             a->activate();
-            a->startTimer();
+            a->startAlarm();
         }
     }
     else
     {
         // we're hitting the keyboard again to stop the alarm
-        a->stopTimer();
+        a->stopAlarm();
         for (auto &al : alarms)
         {
             if (al->getPriority() < a->getPriority() && al->isActivated())
             {
                 cout << "\t" << priority_names2[al->getPriority()] << "\t";
 
-                al->startTimer();
+                al->startAlarm();
                 break; // we only want the next activated timer to be started
             }
         }

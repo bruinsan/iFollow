@@ -57,7 +57,7 @@ TEST(BeepTest, CountBeep)
 
     Alarm a1(250ms, 0ms, 1, 0s, Medium);
     a1.activate();
-    a1.startTimer();
+    a1.startAlarm();
 
     std::this_thread::sleep_for(sleep_time);
 

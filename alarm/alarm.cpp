@@ -64,13 +64,13 @@ void Alarm::deactivate()
     }
 }
 
-void Alarm::startTimer()
+void Alarm::startAlarm()
 {
     if (!this->is_started)
         this->is_started = true;
 }
 
-void Alarm::stopTimer()
+void Alarm::stopAlarm()
 {
     if (this->is_started)
     {

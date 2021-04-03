@@ -46,8 +46,8 @@ public:
 
     void activate();
     void deactivate();
-    void startTimer();
-    void stopTimer();
+    void startAlarm();
+    void stopAlarm();
 
     bool isActivated() const { return is_activated; }
     bool isStarted() const { return is_started; }
