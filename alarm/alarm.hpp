@@ -39,6 +39,8 @@ private:
     thread thr;
     Priority p;
 
+    void beepTask();
+
 public:
     Alarm(TimePeriod bp, TimePeriod bd, int br, TimePeriod _pause, Priority _p);
 
@@ -46,8 +48,6 @@ public:
     void deactivate();
     void startTimer();
     void stopTimer();
-
-    void beepTask();
 
     bool isActivated() const { return is_activated; }
     bool isStarted() const { return is_started; }
